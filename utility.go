@@ -23,8 +23,17 @@ import (
 
 // usage prints the usage string for the app.
 func usage() {
-	fmt.Printf("%s [bless <user>] | [password <user> <pass>] | [transfer <project> <user>] | [list <user>] | [serve [<port>]]\n", os.Args[0])
-	fmt.Printf("DATABASE_TYPE and DATABASE_URL are passed through to the sql to open the database.\n")
+	fmt.Printf(
+`%s [bless <user>] | [password <user> <pass>] | [transfer <project> <user>] | [list <user>] | [serve [<port>]]
+
+bless - mark the given user as a manager
+password - reset the password for the given user
+transfer - transfer the project from the current manager to the given user
+list - list the project ids for the given user
+serve - run the server on localhost:8080
+
+The environmental variables DATABASE_TYPE and DATABASE_URL are passed through to the sql module to open the database
+`, os.Args[0])
 }
 
 func main() {
