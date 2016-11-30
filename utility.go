@@ -82,7 +82,6 @@ func main() {
 			usage()
 			return
 		}
-		fmt.Printf("Starting server on :%s...\n", port)
 		backend.Run(port, dbtype, dbname)
 	} else {
 		usage()
