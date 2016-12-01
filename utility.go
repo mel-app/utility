@@ -157,12 +157,12 @@ func initDB(db *sql.DB) {
 		`DROP TABLE users`,
 		`CREATE TABLE users (
 			name VARCHAR(320) PRIMARY KEY, -- 320 is the maximum email length.
-			salt CHAR(256),
-			password CHAR(256), -- Password is salted and encrypted.
+			salt BYTEA,
+			password BYTEA, -- Password is salted and encrypted.
 			is_manager BOOL -- True if the user is also a manager (can create projects).
 		)`,
 		`CREATE TABLE projects (
-			id INT PRIMARY KEY, -- Is this required??
+			id BIGINT PRIMARY KEY, -- Is this required??
 			name VARCHAR(128), -- Type??
 			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
 			description VARCHAR(512), -- Size??
@@ -170,8 +170,8 @@ func initDB(db *sql.DB) {
 			flag_version INT
 		)`,
 		`CREATE TABLE deliverables (
-			id INT,
-			pid INT,
+			id BIGINT,
+			pid BIGINT,
 			name VARCHAR(128),
 			due DATE,
 			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
@@ -180,12 +180,12 @@ func initDB(db *sql.DB) {
 		)`,
 		`CREATE TABLE owns (
 			name VARCHAR(320) REFERENCES users,
-			pid INT REFERENCES projects,
+			pid BIGINT REFERENCES projects,
 			PRIMARY KEY (name, pid)
 		)`,
 		`CREATE TABLE views (
 			name VARCHAR(320) REFERENCES users,
-			pid INT REFERENCES projects,
+			pid BIGINT REFERENCES projects,
 			PRIMARY KEY (name, pid)
 		)`,
 		// Add a couple of test projects.
