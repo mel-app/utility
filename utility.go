@@ -33,7 +33,8 @@ list - list the project ids for the given user
 serve - run the server on localhost:8080
 init - initialise a new database
 
-The environmental variables DATABASE_TYPE and DATABASE_URL are passed through to the sql module to open the database
+The environmental variables DATABASE_TYPE and DATABASE_URL are passed through to the sql module to open the database.
+DATABASE_TYPE defaults to postgres - note that many of the queries will not work unless they are run with postgres...
 `, os.Args[0])
 }
 
@@ -93,7 +94,7 @@ func main() {
 
 // bless marks a user as a manager
 func bless(user string, db *sql.DB) {
-	_, err := db.Exec("UPDATE users SET is_manager=? WHERE id=?", true, user)
+	_, err := db.Exec("UPDATE users SET is_manager=$1 WHERE name=$2", true, user)
 	if err != nil {
 		fmt.Printf("Error blessing user: %q\n", err)
 	}
@@ -110,7 +111,7 @@ func transfer(spid string, user string, db *sql.DB) {
 	if err != nil || pid < 0 {
 		fmt.Printf("Invalid pid %s\n", spid)
 	}
-	_, err = db.Exec("UPDATE owns SET name=? WHERE pid=?", user, uint(pid))
+	_, err = db.Exec("UPDATE owns SET name=$1 WHERE pid=$2", user, uint(pid))
 	if err != nil {
 		fmt.Printf("Failed to update the owner: %q\n", err)
 	}
@@ -118,7 +119,7 @@ func transfer(spid string, user string, db *sql.DB) {
 
 // list the user's projects with the corresponding PID
 func list(user string, db *sql.DB) {
-	rows, err := db.Query("SELECT pid FROM owns WHERE name=?", user)
+	rows, err := db.Query("SELECT pid FROM owns WHERE name=$1", user)
 	if err != nil {
 		fmt.Printf("Error getting rows: %q\n", err)
 		return
@@ -133,7 +134,7 @@ func list(user string, db *sql.DB) {
 			return
 		}
 		name := ""
-		err = db.QueryRow("SELECT name FROM projects WHERE id=?", id).
+		err = db.QueryRow("SELECT name FROM projects WHERE id=$1", id).
 			Scan(&name)
 		if err != nil {
 			fmt.Printf("Failed to get the name for project %d: %q\n", id, err)
