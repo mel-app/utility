@@ -24,13 +24,14 @@ import (
 // usage prints the usage string for the app.
 func usage() {
 	fmt.Printf(
-`%s [bless <user>] | [password <user> <pass>] | [transfer <project> <user>] | [list <user>] | [serve [<port>]]
+`%s [bless <user>] | [password <user> <pass>] | [transfer <project> <user>] | [list <user>] | [serve [<port>]] | [init]
 
 bless - mark the given user as a manager
 password - reset the password for the given user
 transfer - transfer the project from the current manager to the given user
 list - list the project ids for the given user
 serve - run the server on localhost:8080
+init - initialise a new database
 
 The environmental variables DATABASE_TYPE and DATABASE_URL are passed through to the sql module to open the database
 `, os.Args[0])
@@ -74,6 +75,8 @@ func main() {
 		transfer(os.Args[2], os.Args[3], db)
 	} else if os.Args[1] == "list" && len(os.Args) == 3 {
 		list(os.Args[2], db)
+	} else if os.Args[1] == "init" && len(os.Args) == 2 {
+		initDB(db)
 	} else if os.Args[1] == "serve" {
 		port := "8080"
 		if len(os.Args) == 3 {
@@ -140,6 +143,70 @@ func list(user string, db *sql.DB) {
 	}
 	if rows.Err() != nil {
 		fmt.Printf("Error getting more rows: %q\n", rows.Err())
+	}
+}
+
+// initDB initialises the database with the expected tables
+func initDB(db *sql.DB) {
+	exec := []string{
+		`DROP TABLE views`,
+		`DROP TABLE owns`,
+		`DROP TABLE deliverables`,
+		`DROP TABLE projects`,
+		`DROP TABLE users`,
+		`CREATE TABLE users (
+			name VARCHAR(320) PRIMARY KEY, -- 320 is the maximum email length.
+			salt CHAR(256),
+			password CHAR(256), -- Password is salted and encrypted.
+			is_manager BOOL -- True if the user is also a manager (can create projects).
+		)`,
+		`CREATE TABLE projects (
+			id INT PRIMARY KEY, -- Is this required??
+			name VARCHAR(128), -- Type??
+			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
+			description VARCHAR(512), -- Size??
+			flag BOOL,
+			flag_version INT
+		)`,
+		`CREATE TABLE deliverables (
+			id INT,
+			pid INT,
+			name VARCHAR(128),
+			due DATE,
+			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
+			description VARCHAR(512), -- Size??
+			PRIMARY KEY (id, pid)
+		)`,
+		`CREATE TABLE owns (
+			name VARCHAR(320) REFERENCES users,
+			pid INT REFERENCES projects,
+			PRIMARY KEY (name, pid)
+		)`,
+		`CREATE TABLE views (
+			name VARCHAR(320) REFERENCES users,
+			pid INT REFERENCES projects,
+			PRIMARY KEY (name, pid)
+		)`,
+		// Add a couple of test projects.
+		`INSERT INTO projects VALUES (0, 'Test Project 0', 30, 'First test project', TRUE, 0)`,
+		`INSERT INTO projects VALUES (1, 'Test Project 1', 80, 'Second test project', FALSE, 0)`,
+		`INSERT INTO deliverables VALUES
+			(0, 0, 'Deliverable 0', '11/25/2016', 20, 'Finish backend')`,
+		`INSERT INTO deliverables VALUES
+			(1, 0, 'Deliverable 1', '12/9/2016', 70, 'Finish prototype')`,
+		// Add a test user.
+		`INSERT INTO users VALUES ('test', '', '', TRUE)`,
+		`INSERT INTO owns VALUES ('test', 0)`,
+		`INSERT INTO views VALUES ('test', 1)`,
+	}
+
+	for _, cmd := range exec {
+		_, err := db.Exec(cmd)
+		if err != nil {
+			fmt.Printf("Error executing '%s': %q\n", cmd, err)
+		} else {
+			fmt.Printf("%s\n", cmd)
+		}
 	}
 }
 
