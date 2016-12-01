@@ -59,7 +59,6 @@ func main() {
 		return
 	}
 
-	// Open the database. Note that we don't actually need this for serve.
 	db, err := sql.Open(dbtype, dbname)
 	if err != nil {
 		fmt.Printf("Error opening DB: %q\n", err)
@@ -86,7 +85,7 @@ func main() {
 			usage()
 			return
 		}
-		backend.Run(port, dbtype, dbname)
+		backend.Run(port, db)
 	} else {
 		usage()
 	}
