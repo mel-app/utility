@@ -17,7 +17,6 @@ import (
 	"strconv"
 
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/mel-app/backend/src"
 )
 
@@ -44,22 +43,8 @@ func main() {
 		return
 	}
 
-	// For the database, default to sqlite and a local database if no
-	// DATABASE_TYPE or DATABASE_URL are set.
-	dbtype := os.Getenv("DATABASE_TYPE")
 	dbname := os.Getenv("DATABASE_URL")
-	if dbtype == "" && dbname != "" {
-		dbtype = "postgres"
-	} else if dbtype == "" && dbname == "" {
-		dbtype = "sqlite3"
-		dbname = "test.db"
-	} else if dbtype != "" && dbname == "" {
-		fmt.Printf("DATABASE_TYPE is set, but not DATABASE_URL!")
-		usage()
-		return
-	}
-
-	db, err := sql.Open(dbtype, dbname)
+	db, err := sql.Open("postgres", dbname)
 	if err != nil {
 		fmt.Printf("Error opening DB: %q\n", err)
 		return
