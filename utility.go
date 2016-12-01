@@ -32,8 +32,7 @@ list - list the project ids for the given user
 serve - run the server on localhost:8080
 init - initialise a new database
 
-The environmental variables DATABASE_TYPE and DATABASE_URL are passed through to the sql module to open the database.
-DATABASE_TYPE defaults to postgres - note that many of the queries will not work unless they are run with postgres...
+The environmental variable DATABASE_URL is passed through to the sql module to open the database.
 `, os.Args[0])
 }
 
