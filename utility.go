@@ -149,6 +149,8 @@ func initDB(db *sql.DB) {
 			name VARCHAR(128), -- Type??
 			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
 			description VARCHAR(512), -- Size??
+			updated DATE,
+			version INT,
 			flag BOOL,
 			flag_version INT
 		)`,
@@ -158,7 +160,10 @@ func initDB(db *sql.DB) {
 			name VARCHAR(128),
 			due DATE,
 			percentage SMALLINT CHECK (percentage >= 0 and percentage <= 100),
+			submitted BOOL, -- Whether or not the project is submitted.
 			description VARCHAR(512), -- Size??
+			updated DATE,
+			version INT,
 			PRIMARY KEY (id, pid)
 		)`,
 		`CREATE TABLE owns (
@@ -172,12 +177,12 @@ func initDB(db *sql.DB) {
 			PRIMARY KEY (name, pid)
 		)`,
 		// Add a couple of test projects.
-		`INSERT INTO projects VALUES (0, 'Test Project 0', 30, 'First test project', TRUE, 0)`,
-		`INSERT INTO projects VALUES (1, 'Test Project 1', 80, 'Second test project', FALSE, 0)`,
+		`INSERT INTO projects VALUES (0, 'Test Project 0', 30, 'First test project', '1/17/2017', 0, TRUE, 0)`,
+		`INSERT INTO projects VALUES (1, 'Test Project 1', 80, 'Second test project', '1/17/2017', 0, FALSE, 0)`,
 		`INSERT INTO deliverables VALUES
-			(0, 0, 'Deliverable 0', '11/25/2016', 20, 'Finish backend')`,
+			(0, 0, 'Deliverable 0', '11/25/2016', 20, FALSE, 'Finish backend', '1/17/2017', 0)`,
 		`INSERT INTO deliverables VALUES
-			(1, 0, 'Deliverable 1', '12/9/2016', 70, 'Finish prototype')`,
+			(1, 0, 'Deliverable 1', '12/9/2016', 70, FALSE, 'Finish prototype', '1/17/2017', 0)`,
 		// Add a test user.
 		`INSERT INTO users VALUES ('test', '', '', TRUE)`,
 		`INSERT INTO owns VALUES ('test', 0)`,
