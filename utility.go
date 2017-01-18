@@ -77,7 +77,7 @@ func main() {
 
 // bless marks a user as a manager
 func bless(user string, db *sql.DB) {
-	_, err := db.Exec("UPDATE users SET is_manager=$1 WHERE name=$2", true, user)
+	err := backend.NewDB(db).SetIsManager(user, true)
 	if err != nil {
 		fmt.Printf("Error blessing user: %q\n", err)
 	}
@@ -132,8 +132,7 @@ func list(user string, db *sql.DB) {
 
 // initDB initialises the database with the expected tables
 func initDB(db *sql.DB) {
-	d := backend.NewDB(db)
-	d.Init()
+	backend.NewDB(db).Init()
 }
 
 // vim: sw=4 ts=4 noexpandtab
