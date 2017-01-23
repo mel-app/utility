@@ -26,6 +26,7 @@ func usage() {
 `%s [bless <user>] | [password <user> <pass>] | [transfer <project> <user>] | [list <user>] | [serve [<port>]] | [init]
 
 bless - mark the given user as a manager
+curse - mark the given user as a client (undo a bless)
 password - reset the password for the given user
 transfer - transfer the project from the current manager to the given user
 list - list the project ids for the given user
@@ -53,6 +54,8 @@ func main() {
 	// Run the command.
 	if os.Args[1] == "bless" && len(os.Args) == 3 {
 		bless(os.Args[2], db)
+	} else if os.Args[1] == "curse" && len(os.Args) == 3 {
+		curse(os.Args[2], db)
 	} else if os.Args[1] == "password" && len(os.Args) == 4 {
 		password(os.Args[2], os.Args[3], db)
 	} else if os.Args[1] == "transfer" && len(os.Args) == 4 {
@@ -78,6 +81,14 @@ func main() {
 // bless marks a user as a manager
 func bless(user string, db *sql.DB) {
 	err := backend.NewDB(db).SetIsManager(user, true)
+	if err != nil {
+		fmt.Printf("Error blessing user: %q\n", err)
+	}
+}
+
+// curse marks a user as a client
+func curse(user string, db *sql.DB) {
+	err := backend.NewDB(db).SetIsManager(user, false)
 	if err != nil {
 		fmt.Printf("Error blessing user: %q\n", err)
 	}
