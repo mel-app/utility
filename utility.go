@@ -151,7 +151,7 @@ func transfer(spid string, user string, db *sql.DB) {
 
 // all_users lists all of the users in the database
 func all_users(db *sql.DB) {
-	rows, err := db.Query("SELECT name FROM users")
+	rows, err := db.Query("SELECT name, is_manager FROM users")
 	if err != nil {
 		fmt.Printf("Error getting rows: %q\n", err)
 		return
@@ -160,12 +160,17 @@ func all_users(db *sql.DB) {
 
 	for rows.Next() {
 		name := ""
-		err = rows.Scan(&name)
+		is_manager := false
+		err = rows.Scan(&name, &is_manager)
 		if err != nil {
 			fmt.Printf("Error getting value: %q\n", err)
 			return
 		}
-		fmt.Printf("%q\n", name)
+		if is_manager {
+			fmt.Printf("%q: blessed\n", name)
+		} else {
+			fmt.Printf("%q: cursed\n", name)
+		}
 	}
 	if rows.Err() != nil {
 		fmt.Printf("Error getting more rows: %q\n", rows.Err())
