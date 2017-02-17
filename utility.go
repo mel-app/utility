@@ -11,10 +11,12 @@ Contact:	<hobbitalastair at yandex dot com>
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/mel-app/backend/src"
@@ -23,7 +25,7 @@ import (
 // usage prints the usage string for the app.
 func usage() {
 	fmt.Printf(
-`%s <command> [<args> ...]
+		`%s <command> [<args> ...]
 
 bless <user> - mark the given user as a manager
 curse <user> - mark the given user as a client (undo a bless)
@@ -233,7 +235,18 @@ func all_projects(db *sql.DB) {
 
 // initDB initialises the database with the expected tables
 func initDB(db *sql.DB) {
-	backend.NewDB(db).Init()
+	if confirm("Delete the existing database and initialise a new one?") {
+		backend.NewDB(db).Init()
+	}
+}
+
+// confirm asks the user to confirm and returns true if they do, false
+// otherwise.
+func confirm(prompt string) bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("WARNING: %s [y/N]: ", prompt)
+	result, _ := reader.ReadString('\n')
+	return strings.TrimSpace(result) == "y"
 }
 
 // vim: sw=4 ts=4 noexpandtab
